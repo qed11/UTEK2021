@@ -67,7 +67,7 @@ class Heap():
     def __setitem__(self,key,dist):
         #feed in format ^^ PLZ READ
         if key in self.dic:
-            disc = self.dic[key]
+            disc = self.dic.pop(key)
             self.heap.pop(disc[2])
             self._heapify()
         eminem = [dist, key, len(self.heap)] # a rapper...wrapper... get it?
@@ -75,7 +75,12 @@ class Heap():
         self.heap.append(eminem)
         #self._bubbly(len(self.heap)-1)
         self._heapify()
-    
+        
+    def _reindex(self):
+        for i in range(len(self.heap)):
+                self.heap[i][2] = i
+                self.dic[self.heap[i][1]] = self.heap[i]
+
     def empty(self):
         if self.heap == []:
             return 1
@@ -88,20 +93,21 @@ class Heap():
             if h[parent][0] >= h[i][0]:
                 self._swap(i,parent)
             i = parent
-      
+        
     def _swap(self,i,j):
         h = self.heap
         h[i],h[j] = h[j],h[i]
+        
         h[i][2] = i
         h[j][2] = j
-
+        
     def _heapify(self):
         h = self.heap
         n = len(self.heap) - 1
         i = 0
         while i <= n:
             left = 2*i + 1
-            right = (i+1)*2
+            right = (i+1)*i
             if left <= n and h[left][0] < h[i][0]:
                 mini = left
             else:
@@ -112,9 +118,11 @@ class Heap():
                 break
             self._swap(i,mini)
             i = mini
+        
         for i in range(len(self.heap)):
                 self.heap[i][2] = i
                 self.dic[self.heap[i][1]] = self.heap[i]
+        
     
     def pop(self):
        h = self.heap
@@ -122,6 +130,7 @@ class Heap():
        value = h.pop(0)
        d.pop(value[1])
        self._heapify()
+       
        return value
 
     def change_dist(self, key, dist):
@@ -130,9 +139,9 @@ class Heap():
         if key not in d:
             return
         d[key][0] = dist
-        
         h[d[key][2]][0] = dist
         self._heapify()
+        
     
 
 def Dijkstra(graph, start, end):
@@ -141,7 +150,7 @@ def Dijkstra(graph, start, end):
     prev = {} # dictionary of best path, probably need to change
     
     dist[start.name] = 0 # distance from start to start = 0
-    Q = Heap() # creating priority queue TODO
+    Q = Heap() # creating heap
     for node in graph.nodes:
         if node.name != start.name:
             dist[node.name] = float("inf")

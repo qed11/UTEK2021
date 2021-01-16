@@ -234,23 +234,4 @@ def findpath_acc(inputfile, inputjson):
 
 if __name__ == "__main__":
     findpath_acc("3.in", "3.json")
-    '''
-    q = Heap()
-    q['Yonge'] = 3
-    q['Dundas'] = 6
-    q['College'] = 2
-    q['whassup'] = 4
-    q['pepehands'] = float('inf')
-    print(q.heap)
-    """
-    a = q.pop()
-    print(a)
-    print(q.heap)
-    a = q.pop()
-    print(a)
-    print(q.heap)
-    """
-    q.change_dist('College',80)
-    print(q.heap)
-    print(q.dic)
-    '''
+    

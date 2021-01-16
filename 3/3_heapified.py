@@ -37,14 +37,14 @@ class Graph(object):
             node_list.append(Node.from_dict(node))
         
         return cls(node_list)
-
+'''
 class tempQueue():
     def __init__(self):
         self.q = []
         self.q_dict = {}
     
     def put(self, thing):
-        ''' thing: [distance, node]'''
+        thing: [distance, node]
         self.q.append(thing)
         self.q_dict[thing[1].name] = thing
         self.q.sort(reverse=True, key=lambda x: x[0])
@@ -58,6 +58,82 @@ class tempQueue():
     
     def empty(self):
         return not bool(len(self.q))
+'''    
+class Heap():
+    def __init__(self):
+        self.heap = []
+        self.dic = {}
+
+    def __setitem__(self,key,dist):
+        #feed in format ^^ PLZ READ
+        if key in self.dic:
+            disc = self.dic[key]
+            self.heap.pop(disc[2])
+            self._heapify()
+        eminem = [dist, key, len(self.heap)] # a rapper...wrapper... get it?
+        self.dic[key] = eminem
+        self.heap.append(eminem)
+        #self._bubbly(len(self.heap)-1)
+        self._heapify()
+    
+    def empty(self):
+        if self.heap == []:
+            return 1
+        return 0
+
+    def _bubbly(self,i):
+        h = self.heap
+        while i:
+            parent = (i-1) >> 1
+            if h[parent][0] >= h[i][0]:
+                self._swap(i,parent)
+            i = parent
+      
+    def _swap(self,i,j):
+        h = self.heap
+        h[i],h[j] = h[j],h[i]
+        h[i][2] = i
+        h[j][2] = j
+
+    def _heapify(self):
+        h = self.heap
+        n = len(self.heap) - 1
+        i = 0
+        while i <= n:
+            left = 2*i + 1
+            right = (i+1)*2
+            if left <= n and h[left][0] < h[i][0]:
+                mini = left
+            else:
+                mini = i
+            if right <= n and h[right][0]< h[i][0]:
+                mini = right 
+            if mini == i:
+                break
+            self._swap(i,mini)
+            i = mini
+        for i in range(len(self.heap)):
+                self.heap[i][2] = i
+                self.dic[self.heap[i][1]] = self.heap[i]
+    
+    def pop(self):
+       h = self.heap
+       d = self.dic
+       value = h.pop(0)
+       d.pop(value[1])
+       self._heapify()
+       return value
+
+    def change_dist(self, key, dist):
+        h = self.heap
+        d = self.dic
+        if key not in d:
+            return
+        d[key][0] = dist
+        
+        h[d[key][2]][0] = dist
+        self._heapify()
+    
 
 def Dijkstra(graph, start, end):
 
@@ -65,16 +141,16 @@ def Dijkstra(graph, start, end):
     prev = {} # dictionary of best path, probably need to change
     
     dist[start.name] = 0 # distance from start to start = 0
-    Q = tempQueue() # creating priority queue TODO
+    Q = Heap() # creating priority queue TODO
     for node in graph.nodes:
         if node.name != start.name:
             dist[node.name] = float("inf")
             prev[node.name] = None
-        Q.put([dist[node.name], node])
+        Q[node.name] = float('inf')
     
     while not Q.empty():
-        curr = Q.get()
-        curr_dist, curr_node = curr[0], curr[1]
+        curr = Q.pop()
+        curr_dist, curr_node = curr[0], graph.node_dict[curr[1]]
 
         for neighbour in curr_node.neighbours:
             alt = dist[curr_node.name] + neighbour["Distance"]
@@ -113,7 +189,7 @@ def yen_KSP(graph, start, end, K):
 
     A = []
 
-    A[0] = [get_path(graph, prev, start.name, end.name, node=True), dist[end.name]]
+    A[0] = [get_path(graph, prev, start.name, end.name, nodes=True), dist[end.name]]
 
     potential_paths = []
 
@@ -152,3 +228,23 @@ def findpath_acc(inputfile, inputjson):
 
 if __name__ == "__main__":
     findpath_acc("3.in", "3.json")
+    '''
+    q = Heap()
+    q['Yonge'] = 3
+    q['Dundas'] = 6
+    q['College'] = 2
+    q['whassup'] = 4
+    q['pepehands'] = float('inf')
+    print(q.heap)
+    """
+    a = q.pop()
+    print(a)
+    print(q.heap)
+    a = q.pop()
+    print(a)
+    print(q.heap)
+    """
+    q.change_dist('College',80)
+    print(q.heap)
+    print(q.dic)
+    '''

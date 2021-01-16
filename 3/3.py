@@ -47,14 +47,14 @@ class tempQueue():
         ''' thing: [distance, node]'''
         self.q.append(thing)
         self.q_dict[thing[1].name] = thing
-        self.q.sort(key=lambda x: x[0])
+        self.q.sort(reverse=True, key=lambda x: x[0])
     
     def get(self):
         return self.q.pop()
     
     def change_dist(self, name, new_dist):
         self.q_dict[name][0] = new_dist
-        self.q.sort(key=lambda x: x[0])
+        self.q.sort(reverse=True, key=lambda x: x[0])
     
     def empty(self):
         return not bool(len(self.q))
@@ -71,20 +71,24 @@ def Dijkstra(graph, start, end):
             dist[node.name] = float("inf")
             prev[node.name] = None
         Q.put([dist[node.name], node])
-
+ 
     while not Q.empty():
         curr = Q.get()
         curr_dist, curr_node = curr[0], curr[1]
         
         for neighbour in curr_node.neighbours:
             alt = dist[curr_node.name] + neighbour["Distance"]
-
             if alt < dist[neighbour["Name"]]:
                 dist[neighbour["Name"]] = alt
-                prev[neighbour["Name"]] = curr_node
+                prev[neighbour["Name"]] = curr_node.name
                 Q.change_dist(neighbour["Name"], alt)  
 
     return dist, prev
+
+def yen_KSP(graph, start, end, K):
+    pass
+
+
 
 def findpath_acc(inputfile, inputjson):
 
@@ -104,15 +108,14 @@ def findpath_acc(inputfile, inputjson):
                 except:
                     #print(key, None)
                     pass
-            '''
-            print(dist)
+            '''        
             try:
                 pathlist = [end_name]
                 curr = end_name
-                while prev[curr].name != start_name:
-                    pathlist.append(prev[curr].name)
-                    curr = prev[curr].name
-                if prev[curr].name == start_name:
+                while prev[curr] != start_name:
+                    pathlist.append(prev[curr])
+                    curr = prev[curr]
+                if prev[curr] == start_name:
                     pathlist.append(start_name)
                 print(pathlist, dist[end_name])
             except:

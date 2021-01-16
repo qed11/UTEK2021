@@ -56,7 +56,7 @@ class nearestSearch:
         '''
 
         # Select random starting node
-        startingNode = self.unvisited[random.randint(0, len(self.unvisited))]
+        startingNode = self.unvisited[random.randint(0, len(self.unvisited)-1)]
         self.unvisited.remove(startingNode)
         currNode = startingNode
 

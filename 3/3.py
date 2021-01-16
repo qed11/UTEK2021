@@ -124,8 +124,8 @@ def yen_KSP(graph, start, end, K):
             root_path = A[k-1][0][0:i]
             
             for path, distance in A:
-                if root_path == path[0:i]
-            
+                if root_path == path[0:i]:
+                    pass
 
 
 def findpath_acc(inputfile, inputjson):

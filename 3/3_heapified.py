@@ -126,6 +126,7 @@ class Heap():
        d = self.dic
        value = h.pop(0)
        d.pop(value[1])
+       self._reindex()
        self._heapify()
        return value
 

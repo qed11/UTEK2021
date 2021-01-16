@@ -9,18 +9,23 @@ class Node(object):
         self.accessible = accessible
         self.coordinates = coordinates
         self.neighbours = neighbours
+        self.memory = []
+    
+    def remove_neighbour(self, neighbour_dict):
+        try:
+            self.neighbours.remove(neighbour_dict)
+            self.memory.append(neighbour_dict)
+        except ValueError:
+            #print("neighbour not in this node: {}".format(neighbour_dict))
+            pass
+    
+    def restore_neighbours(self):
+        self.neighbours.extend(self.memory)
+        self.memory = []
     
     @classmethod
     def from_dict(cls, inp_dict):
         return cls(inp_dict["Name"], inp_dict["Accessible"], inp_dict["Coordinates"], inp_dict["Neighbours"])
-
-class Path(object):
-
-    def __init__(self):
-        pass
-
-    def acc_r_(self):
-        pass
 
 class Graph(object):
     '''using linked list rep'''
@@ -83,10 +88,13 @@ def Dijkstra(graph, start, end):
             if not graph.node_dict[neighbour["Name"]].accessible:
                 alt += 5
 
-            if alt < dist[neighbour["Name"]]:
-                dist[neighbour["Name"]] = alt
-                prev[neighbour["Name"]] = curr_node.name
-                Q.change_dist(neighbour["Name"], alt)  
+            try:
+                if alt < dist[neighbour["Name"]]:
+                    dist[neighbour["Name"]] = alt
+                    prev[neighbour["Name"]] = curr_node.name
+                    Q.change_dist(neighbour["Name"], alt)
+            except KeyError:
+                continue
 
     return dist, prev
 
@@ -111,22 +119,93 @@ def yen_KSP(graph, start, end, K):
 
     dist, prev = Dijkstra(graph, start, end) # shortest path
 
-    A = []
+    A = [None for i in range(K)]
+    B = []
 
-    A[0] = [get_path(graph, prev, start.name, end.name, node=True), dist[end.name]]
+    A[0] = ([get_path(graph, prev, start.name, end.name, nodes=True), dist[end.name]])
 
     potential_paths = []
 
-    for k in range(1, K+1):
+    for k in range(1, K):
         for i in range(len(A[k-1][0])-1):
             
             spur_node = A[k-1][0][i]
             root_path = A[k-1][0][0:i]
             
-            for path, distance in A:
-                if root_path == path[0:i]
-            
+            neighbour_restore = []
+            node_restore = []
 
+            for path, distance in A[0:k]:
+                if root_path == path[0:i]:
+                    neighbour_dict = [neighbour for neighbour in path[i].neighbours if (neighbour["Name"] == path[i+1].name)]
+                    path[i].remove_neighbour(neighbour_dict)
+                    path[i+1].remove_neighbour(neighbour_dict)
+                    neighbour_restore.append(path[i])
+                    neighbour_restore.append(path[i])
+                    
+            for root_path_node in root_path:
+                if root_path_node != spur_node:
+                    node_restore.append(root_path_node)
+                    graph.nodes.remove(root_path_node)
+
+            spur_path_dist, spur_path_prev = Dijkstra(graph, spur_node, end)
+            spur_path_list = [get_path(graph, spur_path_prev, spur_node.name, end.name), spur_path_dist[end.name]]
+
+            total_path = root_path + spur_path_list[0]
+
+            if total_path not in B:
+                if not root_path:
+                    root_dist = 0
+                else:
+                    root_dist = dist[root_path[-1].name]
+                B.append([total_path, spur_path_list[1] + root_dist])
+
+            #restoring previous graph and node data
+            for node in neighbour_restore:
+                node.restore_neighbours()
+            graph.nodes.extend(node_restore)
+
+        if B == []:
+            return "no paths found"
+
+        B.sort(reverse=True, key=lambda x: x[1])
+        A[k] = B[0]
+        B.pop(0)
+    return A
+
+
+def get_acc_ratio(node_list):
+    total = 0
+    acc_num = 0
+    for node in node_list:
+        if node.accessible:
+            acc_num += 1
+        total += 1
+
+    return acc_num / total
+
+def get_best_path(paths_list):
+    '''[[path, dist]]'''
+    for i in range(len(paths_list)):
+        if get_acc_ratio(paths_list[i][0]) < .5:
+            curr_dist = max(paths_list[i][1] * 2, paths_list[i][1] + 5)
+            if i == (len(paths_list) - 1):
+                print("ran out of options")
+                paths_list[i][1] = max(paths_list[i][1] * 2, paths_list[i][1] + 5)
+                return paths_list[i]
+            if get_acc_ratio(paths_list[i+1][0]) < 0.5:
+                multiplier = 2
+            else:
+                multiplier = 1
+            
+            if (max(paths_list[i+1][1] * multiplier, paths_list[i+1][1] + 5 * (multiplier-1)) < curr_dist):
+                continue
+            else:
+                paths_list[i][1] = max(paths_list[i][1] * 2, paths_list[i][1] + 5)
+                return paths_list[i]
+    paths_list[0][1] = max(paths_list[i][1] * 2, paths_list[i][1] + 5)
+    return paths_list[0]
+                
 
 def findpath_acc(inputfile, inputjson):
 
@@ -136,18 +215,13 @@ def findpath_acc(inputfile, inputjson):
         for line in f.readlines():
             line = line.strip()
             start_name, end_name = line.split(",")
-            print("Starting at: {} Ending at {}".format(start_name, end_name))
-            dist, prev = Dijkstra(graph, graph.node_dict[start_name], graph.node_dict[end_name])
             
-            '''
-            for key, value in prev.items():
-                try:
-                    print(key, value.name)
-                except:
-                    #print(key, None)
-                    pass
-            '''        
-            print(get_path(graph, prev, start_name, end_name, nodes=False), dist[end_name])
+            A = yen_KSP(graph, graph.node_dict[start_name], graph.node_dict[end_name], 100)
+
+            best_path = get_best_path(A)
+            with open("3.out", "a") as f:
+                f.write("{}, {}\n".format(str([node.name for node in best_path[0]]).replace("'", "").replace("[", "").replace("]", ""), str(best_path[1])))
+
 
 
 if __name__ == "__main__":

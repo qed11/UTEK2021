@@ -1,60 +1,71 @@
+from pathFinder import find_shortest_path
 import random
 
 class nearestSearch:
 
-    def __init__(self, nodeDict):
-        self.nodeDict = nodeDict
-        self.unvisited = [node for node in nodeDict.keys()]
+    '''
+    nearestSearch: class that performs nearest neighbour search with Djikstra's Algorithm
+    '''
+
+    def __init__(self, nodeData):
+        '''
+        :param map (dict):  json data to load
+
+        Initialized parameters:
+        path (list): List containing path followed for tsp
+        unvisited (list): List containing stations to visit for tsp
+        totalCost (int): Value for the total distance followed
+        '''
+
+        self.nodeData = nodeData
         self.totalCost = 0
-        self.visited = []
-        self.visitedScores = []
         self.path = []
-        self.btracking_counter = 0
+        self.unvisited = None
 
     def step(self, node):
+        '''
+        Method that applies one iteration of Djikstras for nearest neighbour search
+
+        :param node (string): Name of current station
+        :return (string): Name of nearest station to visit
+        '''
+
         minVal = 100
-        minStation = None
-        for neighbour in node["Neighbours"]:
-            if neighbour["Name"] in self.unvisited:
-               if neighbour["Distance"] < minVal:
-                   minVal = neighbour["Distance"]
-                   minStation = neighbour["Name"]
+        extendPath = None
+        for unvisited in self.unvisited:
 
-        if minStation == None:
-            return minStation
-        self.visited.append(minStation)
-        self.visitedScores.append(minVal)
-        self.path.append(minStation)
-        self.unvisited.remove(minStation)
+            # Apply Djikstras to find shortest path to a node of interest
+           path_out = find_shortest_path(self.nodeData, node, unvisited)
+           distance = path_out[-1]
+           path = path_out[:-1]
+           if distance < minVal:
+               minVal = distance
+               closeVisited = unvisited
+               extendPath = path[0]
+
+        self.path.extend(extendPath[:-1]) # Include path minus target location (redundant on next iteration)
+        self.unvisited.remove(closeVisited)
         self.totalCost += minVal
-        return minStation
-
-    def reset(self):
-        self.unvisited = [node for node in self.nodeDict.keys()]
-        self.totalCost = 0
-        self.visited = []
-        self.visitedScores = []
-        self.path = []
-        self.btracking_counter = 0
+        return extendPath[-1]
 
     def searchGraph(self):
-        bestScore = 300
-        bestPath = None
-        for _ in range(0, len(self.nodeDict)):
-            startingNode = list(self.nodeDict.keys())[random.randint(0, len(self.nodeDict))]
-            currNode = startingNode
-            while len(self.unvisited) != 0:
-                # Option 1
-                if currNode == None:
-                    self.btracking_counter += 1
-                    currNode = self.visited.pop(0)
-                    self.totalCost += self.visitedScores.pop(0)
-                    self.path.append(currNode)
-                currNode = self.step(self.nodeDict[currNode])
-            if bestScore > self.totalCost:
-                bestScore = self.totalCost
-                bestPath = self.path
-                bestBT = self.btracking_counter
-            self.reset()
-        print("Best case - back tracked {} times".format(bestBT))
-        return bestScore, bestPath, bestBT
+        '''
+        Method that uses Djikstras to find approximate solution to travelling salesman problem over select stations
+
+        :return (int, list): Total distance travelled and list of stations travelled for said distance
+        '''
+
+        # Select random starting node
+        startingNode = self.unvisited[random.randint(0, len(self.unvisited))]
+        self.unvisited.remove(startingNode)
+        currNode = startingNode
+
+        while len(self.unvisited) != 0:
+            currNode = self.step(currNode)
+
+        # Traverse back to original node in the end
+        path_out = find_shortest_path(self.nodeData, currNode, startingNode)
+        self.totalCost += path_out[-1]
+        self.path.extend(path_out[:-1][0])
+
+        return self.totalCost, self.path

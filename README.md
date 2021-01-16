@@ -18,3 +18,9 @@ To run this code, run the command: python 3.py
 Make sure you're in the directory 3
 
 4.py
+
+pathFinder is a copy of 2.py - renamed for the sake of an easier import.
+
+To run this code, run the command: python 4.py
+
+Make sure you're in directory 4

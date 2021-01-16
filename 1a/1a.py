@@ -1,9 +1,9 @@
 import json
 f = open('1a.json','r')
-paths = json.load(f)
+stations = json.load(f)
 f.close()
 yeet = []
-for i in paths['Nodes']:
+for i in stations['Nodes']:
     if i['Accessible'] == True:
         yeet.append(i['Name'])
 wr = open('1a.out','w')

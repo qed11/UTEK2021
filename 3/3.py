@@ -71,13 +71,18 @@ def Dijkstra(graph, start, end):
             dist[node.name] = float("inf")
             prev[node.name] = None
         Q.put([dist[node.name], node])
- 
+    
     while not Q.empty():
         curr = Q.get()
         curr_dist, curr_node = curr[0], curr[1]
-        
+
         for neighbour in curr_node.neighbours:
             alt = dist[curr_node.name] + neighbour["Distance"]
+
+            # checking for accessibility and adding 5 to weight if not accessible
+            if not graph.node_dict[neighbour["Name"]].accessible:
+                alt += 5
+
             if alt < dist[neighbour["Name"]]:
                 dist[neighbour["Name"]] = alt
                 prev[neighbour["Name"]] = curr_node.name
@@ -85,9 +90,42 @@ def Dijkstra(graph, start, end):
 
     return dist, prev
 
-def yen_KSP(graph, start, end, K):
-    pass
+def get_path(graph, prev, start_name, end_name, nodes=True):
+    try:
+        pathlist = [end_name]
+        curr = end_name
+        while prev[curr] != start_name:
+            pathlist.append(prev[curr])
+            curr = prev[curr]
+        if prev[curr] == start_name:
+            pathlist.append(start_name)
+        
+        if nodes:
+            return [graph.node_dict[node_name] for node_name in pathlist[::-1]]
+        else:
+            return pathlist[::-1]
+    except:
+        return []
 
+def yen_KSP(graph, start, end, K):
+
+    dist, prev = Dijkstra(graph, start, end) # shortest path
+
+    A = []
+
+    A[0] = [get_path(graph, prev, start.name, end.name, node=True), dist[end.name]]
+
+    potential_paths = []
+
+    for k in range(1, K+1):
+        for i in range(len(A[k-1][0])-1):
+            
+            spur_node = A[k-1][0][i]
+            root_path = A[k-1][0][0:i]
+            
+            for path, distance in A:
+                if root_path == path[0:i]
+            
 
 
 def findpath_acc(inputfile, inputjson):
@@ -109,17 +147,7 @@ def findpath_acc(inputfile, inputjson):
                     #print(key, None)
                     pass
             '''        
-            try:
-                pathlist = [end_name]
-                curr = end_name
-                while prev[curr] != start_name:
-                    pathlist.append(prev[curr])
-                    curr = prev[curr]
-                if prev[curr] == start_name:
-                    pathlist.append(start_name)
-                print(pathlist, dist[end_name])
-            except:
-                print("xd no path found")
+            print(get_path(graph, prev, start_name, end_name, nodes=False), dist[end_name])
 
 
 if __name__ == "__main__":

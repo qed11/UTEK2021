@@ -9,15 +9,15 @@ with open('2.json') as f:
 #function that implements Djikstra's Algorithm to find the shortest path between two nodes in the JSON listing
 def find_shortest_path(data, LocA, LocB):
     '''
-    (dict, string, string) -> list
+    (dict, string, string) -> [list, int]
 
     Returns a list containing the path, alongside the total distance, between
     LocA and LocB as accessed from the dictionary data from 2.json.
     
     Sample Outputs:
     
-    >>>find_shortest_path(data, "Yonge and Dundas", "College")
-    ["Yonge and Dundas", "College", 15]
+    >>>find_shortest_path(data, "Yonge", "Lawrence West") 
+    Yonge, St. Clair West, Chester, Lawrence West, 12
         
     '''
     start = LocA

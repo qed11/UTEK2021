@@ -69,12 +69,12 @@ class Heap():
         if key in self.dic:
             disc = self.dic.pop(key)
             self.heap.pop(disc[2])
-            self._heapify()
+            self._reindex()
         eminem = [dist, key, len(self.heap)] # a rapper...wrapper... get it?
         self.dic[key] = eminem
         self.heap.append(eminem)
-        #self._bubbly(len(self.heap)-1)
-        self._heapify()
+        self._bubbly(len(self.heap)-1)
+        
         
     def _reindex(self):
         for i in range(len(self.heap)):
@@ -90,7 +90,7 @@ class Heap():
         h = self.heap
         while i:
             parent = (i-1) >> 1
-            if h[parent][0] >= h[i][0]:
+            if h[parent][0] > h[i][0]:
                 self._swap(i,parent)
             i = parent
         
@@ -118,10 +118,7 @@ class Heap():
                 break
             self._swap(i,mini)
             i = mini
-        
-        for i in range(len(self.heap)):
-                self.heap[i][2] = i
-                self.dic[self.heap[i][1]] = self.heap[i]
+        #self._reindex()
         
     
     def pop(self):
@@ -130,7 +127,6 @@ class Heap():
        value = h.pop(0)
        d.pop(value[1])
        self._heapify()
-       
        return value
 
     def change_dist(self, key, dist):
@@ -142,7 +138,7 @@ class Heap():
         h[d[key][2]][0] = dist
         self._heapify()
         
-    
+        
 
 def Dijkstra(graph, start, end):
 

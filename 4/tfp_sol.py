@@ -1,19 +1,15 @@
-import matplotlib.pyplot as plt
 import json
+from nearestSearch import nearestSearch
 
 with open('4.json') as f:
     data = json.load(f)
 
 nodeList = data["Nodes"]
-xList = [node["Coordinates"][0] for node in nodeList]
-yList = [node["Coordinates"][1] for node in nodeList]
-label = [node["Name"] for node in nodeList]
+processDict = {}
+for node in nodeList:
+    processDict[node["Name"]] = node
+    # Preprocessed because a default list sucks
 
-fig, ax = plt.subplots()
-ax.scatter(xList, yList)
-
-for i, v in enumerate(label):
-    ax.annotate(v, (xList[i], yList[i]))
-
-plt.plot()
-plt.show()
+sol = nearestSearch(processDict)
+cost, path, _ = sol.searchGraph()
+print("Cost: {} Visited Path: {}".format(cost, path))

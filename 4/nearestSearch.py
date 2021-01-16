@@ -2,20 +2,20 @@ import random
 
 class nearestSearch:
 
-    def __init__(self, nodeList):
-        self.unvisited = nodeList
-        self.nodeList = nodeList
-        self.unvisited = [node["Name"] for node in nodeList]
+    def __init__(self, nodeDict):
+        self.nodeDict = nodeDict
+        self.unvisited = [node for node in nodeDict.keys()]
         self.totalCost = 0
         self.visited = []
         self.visitedScores = []
         self.path = []
+        self.btracking_counter = 0
 
     def step(self, node):
         minVal = 100
         minStation = None
         for neighbour in node["Neighbours"]:
-            if neighbour["Name"] not in self.visited:
+            if neighbour["Name"] in self.unvisited:
                if neighbour["Distance"] < minVal:
                    minVal = neighbour["Distance"]
                    minStation = neighbour["Name"]
@@ -29,15 +29,32 @@ class nearestSearch:
         self.totalCost += minVal
         return minStation
 
+    def reset(self):
+        self.unvisited = [node for node in self.nodeDict.keys()]
+        self.totalCost = 0
+        self.visited = []
+        self.visitedScores = []
+        self.path = []
+        self.btracking_counter = 0
+
     def searchGraph(self):
-        startingNode = random.randint(0, len(self.nodeList))
-        startingName = self.nodeList[startingNode]["Name"]
-        currNode = startingNode
-        while len(self.unvisited) != 0:
-            # Option 1
-            if currNode == None:
-                currNode = self.visited.pop(0)
-                self.totalCost += self.visitedScores.pop(0)
-                self.path.append(currNode)
-            currNode = self.step(self.nodeList[currNode])
-        return self.totalCost, self.path
+        bestScore = 300
+        bestPath = None
+        for _ in range(0, len(self.nodeDict)):
+            startingNode = list(self.nodeDict.keys())[random.randint(0, len(self.nodeDict))]
+            currNode = startingNode
+            while len(self.unvisited) != 0:
+                # Option 1
+                if currNode == None:
+                    self.btracking_counter += 1
+                    currNode = self.visited.pop(0)
+                    self.totalCost += self.visitedScores.pop(0)
+                    self.path.append(currNode)
+                currNode = self.step(self.nodeDict[currNode])
+            if bestScore > self.totalCost:
+                bestScore = self.totalCost
+                bestPath = self.path
+                bestBT = self.btracking_counter
+            self.reset()
+        print("Best case - back tracked {} times".format(bestBT))
+        return bestScore, bestPath, bestBT

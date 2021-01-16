@@ -13,4 +13,8 @@ To run this code, this file, the input file, and (if already created) the output
 
 3.py
 
+To run this code, run the command: python 3.py 
+
+Make sure you're in the directory 3
+
 4.py

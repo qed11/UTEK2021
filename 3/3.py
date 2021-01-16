@@ -175,6 +175,7 @@ def yen_KSP(graph, start, end, K):
 
 
 def get_acc_ratio(node_list):
+    '''gets accessibility ratio from a node list'''
     total = 0
     acc_num = 0
     for node in node_list:
@@ -185,7 +186,10 @@ def get_acc_ratio(node_list):
     return acc_num / total
 
 def get_best_path(paths_list):
-    '''[[path, dist]]'''
+    '''input style: [[path, dist]]
+        gets best path from a list of potential paths. Returns in the style of:
+        [path, dist]
+    '''
     for i in range(len(paths_list)):
         if get_acc_ratio(paths_list[i][0]) < .5:
             curr_dist = max(paths_list[i][1] * 2, paths_list[i][1] + 5)
@@ -203,7 +207,7 @@ def get_best_path(paths_list):
             else:
                 paths_list[i][1] = max(paths_list[i][1] * 2, paths_list[i][1] + 5)
                 return paths_list[i]
-    paths_list[0][1] = max(paths_list[i][1] * 2, paths_list[i][1] + 5)
+    paths_list[0][1] = max(paths_list[0][1] * 2, paths_list[0][1] + 5)
     return paths_list[0]
                 
 

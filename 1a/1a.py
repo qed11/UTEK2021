@@ -5,17 +5,17 @@ stations = json.load(f)
 f.close()
 
 #check accessibility and writ it into a list
-yeet = []
+accessible = []
 for i in stations['Nodes']:
     if i['Accessible'] == True:
-        yeet.append(i['Name'])
-wr = open('1a.out','w')
+        accessible.append(i['Name'])
 
 #write the list content into the .out file with the correct formatting
-for i in range(len(yeet)):
-    if i < len(yeet)-1:
-        wr.write(yeet[i])
+wr = open('1a.out','w')
+for i in range(len(accessible)):
+    if i < len(accessible)-1:
+        wr.write(accessible[i])
         wr.write(', ')
     else:
-        wr.write(yeet[i])
+        wr.write(accessible[i])
 wr.close()
